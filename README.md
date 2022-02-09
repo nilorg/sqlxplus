@@ -24,7 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	xdbpuls := &sqlxplus.DB{sqlxDB: xdb, log: &StdLogger{}}
+	xdbpuls := &sqlxplus.DB{SqlxTx: xdb, Log: &StdLogger{}}
     var result map[string]interface{}
     err = sqlx.GetContext(ctx, xdbpuls.DB(), &result, "select * from user where id = ?", 1)
     if err != nil {

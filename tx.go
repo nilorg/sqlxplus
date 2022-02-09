@@ -8,92 +8,92 @@ import (
 )
 
 type Tx struct {
-	sqlxTx sqlxer
-	log    Logger
+	SqlxTx sqlxer
+	Log    Logger
 }
 
-func (that *Tx) SqlxTx() *sqlx.Tx {
-	return that.sqlxTx.(*sqlx.Tx)
+func (that *Tx) GetSqlxTx() *sqlx.Tx {
+	return that.SqlxTx.(*sqlx.Tx)
 }
 
 func (that *Tx) QueryContext(ctx context.Context, query string, args ...interface{}) (rows *sql.Rows, err error) {
-	that.log.Printf(ctx, query, args...)
-	rows, err = that.sqlxTx.QueryContext(ctx, query, args...)
+	that.Log.Printf(ctx, query, args...)
+	rows, err = that.SqlxTx.QueryContext(ctx, query, args...)
 	if err != nil {
-		that.log.Errorln(ctx, err)
+		that.Log.Errorln(ctx, err)
 	}
 	return
 }
 
 func (that *Tx) QueryxContext(ctx context.Context, query string, args ...interface{}) (rows *sqlx.Rows, err error) {
-	that.log.Printf(ctx, query, args...)
-	rows, err = that.sqlxTx.QueryxContext(ctx, query, args...)
+	that.Log.Printf(ctx, query, args...)
+	rows, err = that.SqlxTx.QueryxContext(ctx, query, args...)
 	if err != nil {
-		that.log.Errorln(ctx, err)
+		that.Log.Errorln(ctx, err)
 	}
 	return
 }
 
 func (that *Tx) QueryRowxContext(ctx context.Context, query string, args ...interface{}) *sqlx.Row {
-	that.log.Printf(ctx, query, args...)
-	return that.sqlxTx.QueryRowxContext(ctx, query, args...)
+	that.Log.Printf(ctx, query, args...)
+	return that.SqlxTx.QueryRowxContext(ctx, query, args...)
 }
 
 func (that *Tx) ExecContext(ctx context.Context, query string, args ...interface{}) (result sql.Result, err error) {
-	that.log.Printf(ctx, query, args...)
-	result, err = that.sqlxTx.ExecContext(ctx, query, args...)
+	that.Log.Printf(ctx, query, args...)
+	result, err = that.SqlxTx.ExecContext(ctx, query, args...)
 	if err != nil {
-		that.log.Errorln(ctx, err)
+		that.Log.Errorln(ctx, err)
 	}
 	return
 }
 
 func (that *Tx) PrepareContext(ctx context.Context, query string) (stmt *sql.Stmt, err error) {
-	that.log.Println(ctx, query)
-	stmt, err = that.sqlxTx.PrepareContext(ctx, query)
+	that.Log.Println(ctx, query)
+	stmt, err = that.SqlxTx.PrepareContext(ctx, query)
 	if err != nil {
-		that.log.Errorln(ctx, err)
+		that.Log.Errorln(ctx, err)
 	}
 	return
 }
 
 func (that *Tx) Query(query string, args ...interface{}) (rows *sql.Rows, err error) {
-	that.log.Printf(context.Background(), query, args...)
-	rows, err = that.sqlxTx.Query(query, args...)
+	that.Log.Printf(context.Background(), query, args...)
+	rows, err = that.SqlxTx.Query(query, args...)
 	if err != nil {
-		that.log.Errorln(context.Background(), err)
+		that.Log.Errorln(context.Background(), err)
 	}
 	return
 }
 
 func (that *Tx) Queryx(query string, args ...interface{}) (rows *sqlx.Rows, err error) {
-	that.log.Printf(context.Background(), query, args...)
-	rows, err = that.sqlxTx.Queryx(query, args...)
+	that.Log.Printf(context.Background(), query, args...)
+	rows, err = that.SqlxTx.Queryx(query, args...)
 	if err != nil {
-		that.log.Errorln(context.Background(), err)
+		that.Log.Errorln(context.Background(), err)
 	}
 	return
 }
 
 func (that *Tx) QueryRowx(query string, args ...interface{}) *sqlx.Row {
-	that.log.Printf(context.Background(), query, args...)
-	return that.sqlxTx.QueryRowx(query, args...)
+	that.Log.Printf(context.Background(), query, args...)
+	return that.SqlxTx.QueryRowx(query, args...)
 }
 
 func (that *Tx) Exec(query string, args ...interface{}) (result sql.Result, err error) {
-	that.log.Printf(context.Background(), query, args...)
-	result, err = that.sqlxTx.Exec(query, args...)
+	that.Log.Printf(context.Background(), query, args...)
+	result, err = that.SqlxTx.Exec(query, args...)
 	if err != nil {
-		that.log.Errorln(context.Background(), err)
+		that.Log.Errorln(context.Background(), err)
 	}
 	return
 }
 
 func (that *Tx) Prepare(query string) (stmt *sql.Stmt, err error) {
-	that.log.Println(context.Background(), query)
-	stmt, err = that.sqlxTx.Prepare(query)
+	that.Log.Println(context.Background(), query)
+	stmt, err = that.SqlxTx.Prepare(query)
 	if err != nil {
-		that.log.Errorln(context.Background(), err)
+		that.Log.Errorln(context.Background(), err)
 	}
 	return
 }
