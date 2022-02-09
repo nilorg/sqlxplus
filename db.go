@@ -107,7 +107,12 @@ func (that *DB) Prepare(query string) (stmt *sql.Stmt, err error) {
 	return
 }
 
-// ExecContext error handling of sqlx.MustExecContext
+// ExecContext error handling of sqlx.MustExecContext.
 func ExecContext(ctx context.Context, e sqlx.ExecerContext, query string, args ...interface{}) (sql.Result, error) {
 	return e.ExecContext(ctx, query, args...)
+}
+
+// Exec error handling of sqlx.MustExec.
+func Exec(e sqlx.Execer, query string, args ...interface{}) (sql.Result, error) {
+	return e.Exec(query, args...)
 }
