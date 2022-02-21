@@ -2,6 +2,7 @@ package sqlxplus
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -29,6 +30,64 @@ func InterfaceToString(src interface{}) string {
 		return fmt.Sprintf("'%s'", v)
 	case uint8, uint16, uint32, uint64, int, int8, int32, int64, float32, float64:
 		return fmt.Sprint(v)
+	case bool:
+		if v {
+			return "true"
+		} else {
+			return "false"
+		}
+	case sql.NullBool:
+		if v.Valid {
+			if v.Bool {
+				return "true"
+			} else {
+				return "false"
+			}
+		} else {
+			return "null"
+		}
+	case sql.NullByte:
+		if v.Valid {
+			return fmt.Sprint(v.Byte)
+		} else {
+			return "null"
+		}
+	case sql.NullFloat64:
+		if v.Valid {
+			return fmt.Sprint(v.Float64)
+		} else {
+			return "null"
+		}
+	case sql.NullInt16:
+		if v.Valid {
+			return fmt.Sprint(v.Int16)
+		} else {
+			return "null"
+		}
+	case sql.NullInt32:
+		if v.Valid {
+			return fmt.Sprint(v.Int32)
+		} else {
+			return "null"
+		}
+	case sql.NullInt64:
+		if v.Valid {
+			return fmt.Sprint(v.Int64)
+		} else {
+			return "null"
+		}
+	case sql.NullString:
+		if v.Valid {
+			return v.String
+		} else {
+			return "null"
+		}
+	case sql.NullTime:
+		if v.Valid {
+			return v.Time.Format("2006-01-02 15:04:05")
+		} else {
+			return "null"
+		}
 	}
 	data, err := json.Marshal(src)
 	if err != nil {
