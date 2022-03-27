@@ -42,7 +42,7 @@ func FromSqlxContext(ctx context.Context) (conn *DBConnect, err error) {
 
 // CheckSqlxTranContextExist 检查sqlx是否存在
 func CheckSqlxTranContextExist(ctx context.Context) bool {
-	_, ok := ctx.Value(SqlxTranKey{}).(*DB)
+	_, ok := ctx.Value(SqlxTranKey{}).(*Tx)
 	return ok
 }
 
