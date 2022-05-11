@@ -3,6 +3,7 @@ package sqlxplus
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -94,6 +95,96 @@ func (that *Tx) Prepare(query string) (stmt *sql.Stmt, err error) {
 	stmt, err = that.SqlxTx.Prepare(query)
 	if err != nil {
 		that.Log.Errorln(context.Background(), err)
+	}
+	return
+}
+
+type CreateSqlxTranContextFunc func(ctx context.Context, tx *sqlx.Tx) context.Context
+type TransactionFunc func(context.Context) error
+
+type ExecTransactionOptions struct {
+	DB                        *sqlx.DB
+	Log                       Logger
+	CreateSqlxTranContextFunc CreateSqlxTranContextFunc
+}
+type ExecTransactionOption func(o *ExecTransactionOptions)
+
+func newExecTransactionOptions(opts ...ExecTransactionOption) ExecTransactionOptions {
+	var o ExecTransactionOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.Log == nil {
+		o.Log = &StdLogger{}
+	}
+	if o.CreateSqlxTranContextFunc == nil {
+		o.CreateSqlxTranContextFunc = func(ctx context.Context, tx *sqlx.Tx) context.Context {
+			return NewSqlxTranContext(ctx, &Tx{SqlxTx: tx, Log: o.Log})
+		}
+	}
+	return o
+}
+
+func WithExecTransactionDB(db *sqlx.DB) ExecTransactionOption {
+	return func(o *ExecTransactionOptions) {
+		o.DB = db
+	}
+}
+
+func WithExecTransactionLogger(log Logger) ExecTransactionOption {
+	return func(o *ExecTransactionOptions) {
+		o.Log = log
+	}
+}
+
+func WithExecTransactionCreateSqlxTranContextFunc(f CreateSqlxTranContextFunc) ExecTransactionOption {
+	return func(o *ExecTransactionOptions) {
+		o.CreateSqlxTranContextFunc = f
+	}
+}
+
+var ErrExecTransactionOptionDBIsNil = errors.New("db in options is nil")
+
+func ExecTransaction(ctx context.Context, f TransactionFunc, opts ...ExecTransactionOption) (err error) {
+	op := newExecTransactionOptions(opts...)
+	var tran *sqlx.Tx
+	// 判断上下文是否存在事务，如果不存在事务，则开启事务
+	if !CheckSqlxTranContextExist(ctx) {
+		// 判断上下文是否存在数据库，如果不存在数据库，则使用可选参数中的数据库
+		var conn *DBConnect
+		if conn, err = FromSqlxContext(ctx); err != nil {
+			if errors.Is(err, ErrContextNotFoundSqlx) {
+				err = nil
+				if op.DB == nil {
+					err = ErrExecTransactionOptionDBIsNil
+					return
+				}
+				if tran, err = op.DB.Beginx(); err != nil {
+					return
+				}
+			} else {
+				return
+			}
+		} else {
+			if tran, err = conn.DB().GetSqlxDB().Beginx(); err != nil {
+				return
+			}
+		}
+		defer func() {
+			if reErr := recover(); reErr != nil {
+				err = reErr.(error)
+				tran.Rollback()
+			} else if err != nil {
+				tran.Rollback()
+			}
+		}()
+		ctx = op.CreateSqlxTranContextFunc(ctx, tran)
+	}
+	if err = f(ctx); err != nil {
+		return
+	}
+	if !CheckSqlxTranContextExist(ctx) {
+		err = tran.Commit()
 	}
 	return
 }
