@@ -21,6 +21,10 @@ type Logger interface {
 	Errorln(ctx context.Context, args ...interface{})
 }
 
+type sqlString interface {
+	String() string
+}
+
 func InterfaceToString(src interface{}) string {
 	if src == nil {
 		return ""
@@ -28,6 +32,8 @@ func InterfaceToString(src interface{}) string {
 	switch v := src.(type) {
 	case string:
 		return fmt.Sprintf("'%s'", v)
+	case sqlString:
+		return fmt.Sprintf("'%s'", v.String())
 	case uint8, uint16, uint32, uint64, int, int8, int32, int64, float32, float64:
 		return fmt.Sprint(v)
 	case bool:
