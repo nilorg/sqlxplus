@@ -149,6 +149,7 @@ func ExecTransaction(ctx context.Context, f TransactionFunc, opts ...ExecTransac
 	op := newExecTransactionOptions(opts...)
 	var tran *sqlx.Tx
 	// 判断上下文是否存在事务，如果不存在事务，则开启事务
+	tranCreateFlag := false
 	if !CheckSqlxTranContextExist(ctx) {
 		// 判断上下文是否存在数据库，如果不存在数据库，则使用可选参数中的数据库
 		var conn *DBConnect
@@ -179,11 +180,12 @@ func ExecTransaction(ctx context.Context, f TransactionFunc, opts ...ExecTransac
 			}
 		}()
 		ctx = op.CreateSqlxTranContextFunc(ctx, tran)
+		tranCreateFlag = true
 	}
 	if err = f(ctx); err != nil {
 		return
 	}
-	if !CheckSqlxTranContextExist(ctx) {
+	if tranCreateFlag {
 		err = tran.Commit()
 	}
 	return
