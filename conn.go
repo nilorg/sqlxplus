@@ -16,3 +16,11 @@ func (db *DBConnect) Transaction() *Tx {
 func (db *DBConnect) DB() *DB {
 	return db.conn.(*DB)
 }
+
+func (db *DBConnect) Adapter() sqlxer {
+	if db.transaction {
+		return db.Transaction()
+	} else {
+		return db.DB()
+	}
+}
